@@ -246,18 +246,18 @@
 		"backgroundColor": "#FFFFFF",
 		"list": [{
 			"pagePath": "pages/list/list",
-			"iconPath": "static/tabbar/list.png",
-			"selectedIconPath": "static/tabbar/list_active.png",
-			"text": "列表"
+			"iconPath": "/static/tabbar/home.png",
+			"selectedIconPath": "/static/tabbar/home-active.png",
+			"text": "首页"
 		}, {
 			"pagePath": "pages/grid/grid",
-			"iconPath": "static/tabbar/grid.png",
-			"selectedIconPath": "static/tabbar/grid_active.png",
-			"text": "宫格"
+			"iconPath": "/static/tabbar/venue.png",
+			"selectedIconPath": "/static/tabbar/venue-active.png",
+			"text": "球馆"
 		}, {
 			"pagePath": "pages/ucenter/ucenter",
-			"iconPath": "static/tabbar/me.png",
-			"selectedIconPath": "static/tabbar/me_active.png",
+			"iconPath": "/static/tabbar/my.png",
+			"selectedIconPath": "/static/tabbar/my-active.png",
 			"text": "我的"
 		}]
 	},
