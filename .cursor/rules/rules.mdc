@@ -1,0 +1,191 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# 青沅篮球小程序开发规范（CURSOR Rules）
+
+---
+
+## 📦 技术栈约定
+
+```markdown
+RULE: 本项目基于 UniApp + UniCloud 开发，使用云函数和云数据库（非 REST API），前端采用 Vue 语法，使用 <script setup> + Pinia 状态管理。
+```
+
+```markdown
+RULE: 所有数据库操作必须通过云函数进行，不允许在前端直接增删改云数据库数据（只读查询可酌情放开）。
+```
+
+```markdown
+RULE: 所有前端页面均使用原生小程序组件或 uView UI / element-plus 移动版组件，禁止引入大型外部 UI 框架。
+```
+
+```markdown
+RULE: 本项目用户登录和账户管理功能原则上采用 uni-id-pages 模块（基于 uni-id-common 和 uni-id-co），但由于微信小程序平台当前暂不支持小程序收集、存储实名用户身份信息，故线上版本应关闭实名注册、身份证上传、实名认证等敏感功能，仅保留手机号登录、微信登录、基本注册信息。
+如需发布完整版账户管理功能，请另行在 Web App 或 App 平台实现。
+```
+
+---
+
+## 🗂 项目结构规则
+
+```markdown
+RULE: 项目代码目录结构如下：
+
+- /pages 球队、比赛、预约等小程序页面
+- /components 可复用 Vue 组件
+- /store 使用 Pinia 管理全局状态（如当前用户、当前球队）
+- /cloudfunctions 云函数目录，按模块分组（如 team、match、venue）
+- /utils 工具函数（如时间处理、权限判断等）
+```
+
+```markdown
+RULE: 云函数命名规则统一为 模块名\_动作名，如 match_create、team_invite，保持简洁与一致性。
+```
+
+---
+
+## 🧾 数据库与集合命名规则（UniCloud）
+
+```markdown
+RULE: 所有集合名称使用小写蛇形命名（snake_case），如 teams、team_members、matches、venues。
+```
+
+```markdown
+RULE: 每个集合必须包含以下字段：\_id、create_time、update_time，便于日志追踪。
+```
+
+```markdown
+RULE: 用户数据统一使用内置 uni-id-users，不单独扩展用户集合，扩展信息通过 user_profile 集合存储。
+```
+
+---
+
+## 📡 云函数接口设计规范
+
+```markdown
+RULE: 所有云函数都必须进行用户身份验证（使用 uniID.getUserInfo()），并在需要时校验用户权限。
+```
+
+```markdown
+RULE: 云函数返回格式统一如下：
+{
+code: 0, // 0 为成功，其它为错误码
+msg: '成功' | '失败原因',
+data: { ... } // 有返回数据时
+}
+```
+
+```markdown
+RULE: 云函数需封装为服务化接口，在 /cloudfunctions/common/ 中建立统一响应封装模块。
+```
+
+---
+
+## 👨‍💻 前端开发规则
+
+```markdown
+RULE: 所有页面使用 <script setup> 写法，风格统一简洁直观。
+```
+
+```markdown
+RULE: 网络请求统一封装为 useApi（如：useMatchApi、useTeamApi），所有调用通过 composables 封装后调用。
+```
+
+```markdown
+RULE: 页面状态数据统一使用 Pinia 管理，尤其是登录用户、当前选中球队等全局状态。
+```
+
+```markdown
+RULE: 表单校验统一使用 @dcloudio/uni-ui 的 uni-forms 或 vee-validate 插件，严禁表单无校验提交。
+```
+
+---
+
+## 🧪 测试与调试规则
+
+```markdown
+RULE: 每一个核心模块（如发起比赛、接受邀请、预约时间判断）都需编写测试账号进行验证，测试场景应覆盖异常路径。
+```
+
+```markdown
+RULE: 所有云函数开发完成后，必须配合 Postman 或云函数模拟器做单独测试，前端联调前不接受上线。
+```
+
+---
+
+## 📈 部署与上线规则
+
+```markdown
+RULE: 所有前端提交必须经过 HBuilderX 的构建工具编译预览，无报错或警告后方可提交 Git。
+```
+
+```markdown
+RULE: 正式版本部署需发布说明，记录功能点、涉及页面、是否需要数据库迁移，避免多人协作出现冲突。
+```
+
+---
+
+## 🤝 匹配算法与比赛推荐逻辑
+
+```markdown
+RULE: 比赛发起后，如未指定对手球队，则标记为 open 状态，任意非发起方球队均可在“公开挑战”中报名参与。每支球队每日最多发起或应战 3 场比赛。
+```
+
+```markdown
+RULE: 匹配时必须校验时间段冲突，同一球队不能在同一时间参与多场比赛（可选限制）。
+```
+
+```markdown
+RULE: 比赛推荐算法可在客户端预筛选匹配度：优先推荐最近一周有空场、技能等级相近（根据历史战绩评分）的球队作为可 PK 目标，后续版本支持匹配权重配置。
+```
+
+---
+
+## ⏰ 推荐时间逻辑
+
+```markdown
+RULE: 推荐时间算法需优先选择最近有连续 2 小时空闲的时间段。若当前时段剩余不足 2 小时，则推荐次日优先时间（如 10:00-12:00）。
+```
+
+```markdown
+RULE: 所有推荐时间段由后端云函数 match_suggestTime 提供，优先查询场地空闲时间 → 再结合用户球队历史活跃时段。
+```
+
+```markdown
+RULE: 时间推荐返回值结构为：
+{
+venueId,
+startTime,
+endTime,
+reason: 'recently available' | 'user preferred' | 'default'
+}
+供前端做 UI 提示说明。
+```
+
+---
+
+## 🧩 组件开发规范
+
+```markdown
+RULE: 页面结构推荐拆分为组件：如比赛卡片、球队信息卡、队员头像列表、预约时间选择器等，均应封装为独立 Vue 组件，放置在 /components 目录下。
+```
+
+```markdown
+RULE: 所有组件必须具备 props 接收数据、emits 返回事件，不允许直接在组件内部处理全局状态或调用 API。
+```
+
+```markdown
+RULE: 组件命名统一使用 PascalCase.vue 格式（如 TeamCard.vue、MatchForm.vue），文件名与组件名一致。
+```
+
+```markdown
+RULE: 组件样式推荐使用 scoped 和 tailwind，不允许全局样式污染。
+```
+
+```markdown
+RULE: 复用组件应尽可能解耦业务逻辑，例如 TimeSlotPicker.vue 只负责渲染和选中逻辑，不负责数据请求。
+```
+
+---
