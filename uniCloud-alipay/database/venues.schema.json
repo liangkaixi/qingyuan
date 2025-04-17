@@ -1,0 +1,58 @@
+{
+	"bsonType": "object",
+	"required": ["name", "address", "openTime", "closeTime"],
+	"permission": {
+		"read": true,
+		"create": false,
+		"update": false,
+		"delete": false
+	},
+	"properties": {
+		"_id": {
+			"description": "ID，系统自动生成"
+		},
+		"name": {
+			"bsonType": "string",
+			"description": "场馆名称",
+			"title": "场馆名称"
+		},
+		"address": {
+			"bsonType": "string",
+			"description": "场馆地址",
+			"title": "场馆地址"
+		},
+		"openTime": {
+			"bsonType": "string",
+			"description": "开放时间，格式：HH:mm",
+			"title": "开放时间"
+		},
+		"closeTime": {
+			"bsonType": "string",
+			"description": "关闭时间，格式：HH:mm",
+			"title": "关闭时间"
+		},
+		"availableTypes": {
+			"bsonType": "array",
+			"description": "可用场地类型",
+			"title": "场地类型",
+			"items": {
+				"bsonType": "string",
+				"enum": ["full", "half"]
+			}
+		},
+		"create_time": {
+			"bsonType": "timestamp",
+			"description": "创建时间",
+			"defaultValue": {
+				"$env": "now"
+			}
+		},
+		"update_time": {
+			"bsonType": "timestamp",
+			"description": "更新时间",
+			"defaultValue": {
+				"$env": "now"
+			}
+		}
+	}
+} 

@@ -1,6 +1,6 @@
 {
 	"pages": [{
-			"path": "pages/list/list",
+			"path": "pages/home/home",
 			"style": {
 				// #ifndef APP
 				"enablePullDownRefresh": true,
@@ -9,7 +9,7 @@
 			}
 		},
 		{
-			"path": "pages/grid/grid",
+			"path": "pages/venues/venues",
 			"style": {
 				//#ifndef MP
 				"navigationStyle": "custom"
@@ -218,7 +218,7 @@
 		},
 		// #endif
 		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "uni-starter",
+		"navigationBarTitleText": "青沅球馆",
 		"navigationBarBackgroundColor": "#FFFFFF",
 		"backgroundColor": "#F8F8F8",
 		"enablePullDownRefresh": false,
@@ -245,12 +245,12 @@
 		"borderStyle": "black",
 		"backgroundColor": "#FFFFFF",
 		"list": [{
-			"pagePath": "pages/list/list",
+			"pagePath": "pages/home/home",
 			"iconPath": "/static/tabbar/home.png",
 			"selectedIconPath": "/static/tabbar/home-active.png",
 			"text": "首页"
 		}, {
-			"pagePath": "pages/grid/grid",
+			"pagePath": "pages/venues/venues",
 			"iconPath": "/static/tabbar/venue.png",
 			"selectedIconPath": "/static/tabbar/venue-active.png",
 			"text": "球馆"

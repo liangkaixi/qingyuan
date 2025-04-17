@@ -1,0 +1,11 @@
+{
+  "name": "venue_init",
+  "version": "1.0.0",
+  "description": "初始化场地数据",
+  "main": "index.js",
+  "dependencies": {},
+  "cloudfunction-config": {
+    "timeout": 30000,
+    "memorySize": 256
+  }
+} 

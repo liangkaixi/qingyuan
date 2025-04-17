@@ -1,0 +1,73 @@
+{
+	"bsonType": "object",
+	"required": ["venueId", "userId", "type", "startTime", "endTime"],
+	"permission": {
+		"read": "auth.uid != null",
+		"create": "auth.uid != null",
+		"update": "doc.userId == auth.uid",
+		"delete": "doc.userId == auth.uid"
+	},
+	"properties": {
+		"_id": {
+			"description": "ID，系统自动生成"
+		},
+		"venueId": {
+			"bsonType": "string",
+			"description": "场馆ID",
+			"foreignKey": "venues._id"
+		},
+		"userId": {
+			"bsonType": "string",
+			"description": "用户ID",
+			"foreignKey": "uni-id-users._id"
+		},
+		"type": {
+			"bsonType": "string",
+			"description": "预约类型：full-全场，half-半场",
+			"enum": ["full", "half"]
+		},
+		"startTime": {
+			"bsonType": "timestamp",
+			"description": "开始时间"
+		},
+		"endTime": {
+			"bsonType": "timestamp",
+			"description": "结束时间"
+		},
+		"status": {
+			"bsonType": "string",
+			"description": "预约状态：pending-待确认，confirmed-已确认，cancelled-已取消",
+			"enum": ["pending", "confirmed", "cancelled"],
+			"defaultValue": "pending"
+		},
+		"create_time": {
+			"bsonType": "timestamp",
+			"description": "创建时间",
+			"defaultValue": {
+				"$env": "now"
+			}
+		},
+		"update_time": {
+			"bsonType": "timestamp",
+			"description": "更新时间",
+			"defaultValue": {
+				"$env": "now"
+			}
+		}
+	},
+	"indexes": [
+		{
+			"IndexName": "venue_time_idx",
+			"MgoKeySchema": {
+				"MgoIndexKeys": [{
+					"Name": "venueId",
+					"Direction": "1"
+				}, {
+					"Name": "startTime",
+					"Direction": "1"
+				}],
+				"MgoIsUnique": false
+			}
+		}
+	]
+} 
