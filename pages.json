@@ -86,6 +86,27 @@
 				"navigationBarTitleText": "预约详情",
 				"enablePullDownRefresh": false
 			}
+		},
+		{
+			"path": "pages/match/create",
+			"style": {
+				"navigationBarTitleText": "发起比赛",
+				"enablePullDownRefresh": false
+			}
+		},
+		{
+			"path": "pages/match/my",
+			"style": {
+				"navigationBarTitleText": "我的比赛",
+				"enablePullDownRefresh": true
+			}
+		},
+		{
+			"path": "pages/match/detail",
+			"style": {
+				"navigationBarTitleText": "比赛详情",
+				"enablePullDownRefresh": false
+			}
 		}
 		// #ifdef APP
 		, {

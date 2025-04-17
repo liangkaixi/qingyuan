@@ -372,6 +372,31 @@ const onReachBottom = () => {
 
 onMounted(() => {
   fetchBookings();
+
+  // 检查是否有新预约，询问是否发起比赛
+  const pages = getCurrentPages();
+  const currentPage = pages[pages.length - 1];
+  const options = currentPage.options;
+
+  if (options && options.fromBooking && options.fromBooking === "true") {
+    // 延迟显示，确保页面已完全加载
+    setTimeout(() => {
+      uni.showModal({
+        title: "预约成功",
+        content: "是否要发起一场比赛？",
+        confirmText: "发起比赛",
+        cancelText: "暂不发起",
+        success: (res) => {
+          if (res.confirm) {
+            // 跳转到比赛发起页面
+            uni.navigateTo({
+              url: "/pages/match/create",
+            });
+          }
+        },
+      });
+    }, 500);
+  }
 });
 </script>
 

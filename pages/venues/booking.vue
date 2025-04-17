@@ -604,10 +604,38 @@ const submitBooking = async () => {
         title: "预约成功",
         icon: "success",
       });
-      // 跳转到我的预约列表页面
+      // 显示确认对话框
       setTimeout(() => {
-        uni.redirectTo({
-          url: "/pages/ucenter/my-bookings",
+        uni.showModal({
+          title: "预约成功",
+          content: "是否要发起一场比赛？",
+          confirmText: "发起比赛",
+          cancelText: "查看预约",
+          success: (res) => {
+            if (res.confirm) {
+              // 用户选择发起比赛，跳转到比赛创建页面
+              const params = {
+                venueId: venueId.value,
+                venueName: venue.value.name,
+                date: selectedDate.value,
+                startTime: selectedTimeSlot.value.start,
+                endTime: selectedTimeSlot.value.end,
+                userId: store.userInfo._id,
+                contactPhone: contactPhone.value,
+              };
+
+              uni.navigateTo({
+                url: `/pages/match/create?data=${encodeURIComponent(
+                  JSON.stringify(params)
+                )}`,
+              });
+            } else {
+              // 用户选择查看预约，跳转到我的预约列表
+              uni.redirectTo({
+                url: "/pages/ucenter/my-bookings?fromBooking=true",
+              });
+            }
+          },
         });
       }, 1500);
     } else {

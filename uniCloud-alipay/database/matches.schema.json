@@ -1,0 +1,97 @@
+{
+  "bsonType": "object",
+  "required": ["userId", "teamName", "matchType", "date", "startTime", "endTime", "status", "invitation"],
+  "permission": {
+    "read": true,
+    "create": "auth.uid != null",
+    "update": "doc.userId == auth.uid",
+    "delete": "doc.userId == auth.uid"
+  },
+  "properties": {
+    "_id": {
+      "description": "ID，系统自动生成"
+    },
+    "userId": {
+      "bsonType": "string",
+      "description": "发起人用户ID",
+      "foreignKey": "uni-id-users._id"
+    },
+    "teamName": {
+      "bsonType": "string",
+      "description": "球队名称",
+      "maxLength": 20
+    },
+    "matchType": {
+      "bsonType": "string",
+      "description": "比赛类型：basketball-篮球，volleyball-气排球",
+      "enum": ["basketball", "volleyball"]
+    },
+    "gender": {
+      "bsonType": "string",
+      "description": "气排球性别：male-男子，female-女子",
+      "enum": ["male", "female", "不限"]
+    },
+    "date": {
+      "bsonType": "string",
+      "description": "比赛日期，格式：YYYY-MM-DD"
+    },
+    "startTime": {
+      "bsonType": "string",
+      "description": "开始时间，格式：HH:mm"
+    },
+    "endTime": {
+      "bsonType": "string",
+      "description": "结束时间，格式：HH:mm"
+    },
+    "venueId": {
+      "bsonType": "string",
+      "description": "场地ID",
+      "foreignKey": "venues._id"
+    },
+    "venueName": {
+      "bsonType": "string",
+      "description": "场地名称"
+    },
+    "status": {
+      "bsonType": "string",
+      "description": "比赛状态：pending-待接受，accepted-已接受，rejected-已拒绝，cancelled-已取消",
+      "enum": ["pending", "accepted", "rejected", "cancelled"]
+    },
+    "invitation": {
+      "bsonType": "string",
+      "description": "比赛邀请内容",
+      "maxLength": 200
+    },
+    "teams": {
+      "bsonType": "array",
+      "description": "报名球队列表",
+      "items": {
+        "bsonType": "object",
+        "required": ["userId", "name", "status"],
+        "properties": {
+          "userId": {
+            "bsonType": "string",
+            "description": "球队用户ID"
+          },
+          "name": {
+            "bsonType": "string",
+            "description": "球队名称"
+          },
+          "status": {
+            "bsonType": "string",
+            "description": "报名状态：pending-待确认，accepted-已接受",
+            "enum": ["pending", "accepted"]
+          }
+        }
+      }
+    },
+    "create_time": {
+      "bsonType": "timestamp",
+      "description": "创建时间"
+    },
+    "update_time": {
+      "bsonType": "timestamp",
+      "description": "更新时间"
+    }
+  }
+} 
