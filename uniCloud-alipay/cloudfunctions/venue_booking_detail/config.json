@@ -1,0 +1,6 @@
+{
+  "timeout": 5000,
+  "memorySize": 256,
+  "triggers": [],
+  "path": "/venue_booking_detail"
+} 

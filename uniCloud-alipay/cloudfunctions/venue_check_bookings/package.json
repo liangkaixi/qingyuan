@@ -1,0 +1,8 @@
+{
+  "name": "venue_check_bookings",
+  "version": "1.0.0",
+  "description": "检查数据库中的预约记录",
+  "main": "index.js",
+  "dependencies": {},
+  "author": ""
+} 
