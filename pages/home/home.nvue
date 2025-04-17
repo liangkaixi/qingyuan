@@ -1,298 +1,522 @@
 <template>
-	<view class="pages">
-		<!-- #ifndef H5 -->
-		<statusBar></statusBar>
-		<!-- #endif -->
+  <view class="container">
+    <!-- 顶部品牌区域 -->
+    <view class="brand-section">
+      <view class="brand-content">
+        <view class="brand-info">
+          <text class="brand-title">青沅篮球</text>
+          <text class="brand-slogan">专业训练，精彩赛事，篮球梦想从这里起航！</text>
+          <view class="brand-promo-container">
+            <text class="brand-promo">路虽远一点，但专业不止一点点</text>
+            <text class="brand-promo-sub">开车5分钟可到</text>
+          </view>
+        </view>
+      </view>
+      <view class="brand-decoration"></view>
+    </view>
 
-		<!-- 搜索功能 -->
-		<view class="uni-search-box">
-			<uni-search-bar v-model="keyword" ref="searchBar" radius="100" cancelButton="none" disabled
-				:placeholder="inputPlaceholder" />
-			<view class="cover-search-bar" @click="searchClick"></view>
-		</view>
+    <!-- 轮播图区域 -->
+    <swiper class="banner" circular autoplay interval="3000" duration="500" :indicator-dots="true" indicator-color="rgba(255, 255, 255, 0.6)" indicator-active-color="#ffffff">
+      <swiper-item v-for="(item, index) in banners" :key="index" class="banner-item">
+        <image :src="item.image" mode="aspectFill" class="banner-image"></image>
+      </swiper-item>
+    </swiper>
 
-		<!-- 功能导航 -->
-		<view class="nav-section">
-			<view class="nav-item" @click="navigateTo('/pages/venues/venues')">
-				<image class="nav-icon" src="/static/icons/venue-booking.png" mode="aspectFit"></image>
-				<text class="nav-text">球馆预约</text>
-			</view>
-			<view class="nav-item" @click="navigateTo('/pages/match/list')">
-				<image class="nav-icon" src="/static/icons/match-create.png" mode="aspectFit"></image>
-				<text class="nav-text">比赛列表</text>
-			</view>
-			<view class="nav-item" @click="navigateTo('/pages/match/create')">
-				<image class="nav-icon" src="/static/icons/match-create.png" mode="aspectFit"></image>
-				<text class="nav-text">发起比赛</text>
-			</view>
-			<view class="nav-item" @click="navigateTo('/pages/match/my')">
-				<image class="nav-icon" src="/static/icons/match-create.png" mode="aspectFit"></image>
-				<text class="nav-text">我的比赛</text>
-			</view>
-		</view>
-
-		<unicloud-db ref='udb' v-slot:default="{data,pagination,hasMore, loading, error, options}" @error="onqueryerror"
-			:collection="colList" :page-size="10"
-			>
-			<!-- 基于 uni-list 的页面布局 field="user_id.nickname"-->
-			<uni-list class="uni-list" :border="false" :style="{height:listHight}">
-				
-				<!-- 作用于app端nvue页面的下拉加载 -->
-				<!-- #ifdef APP-NVUE -->
-				<refreshBox @refresh="refresh" :loading="loading"></refreshBox>
-				<!-- #endif -->
-
-				<!-- 列表渲染 -->
-				<uni-list-item :to="'/pages/list/detail?id='+item._id+'&title='+item.title" v-for="(item,index) in data" :key="index">
-					<!-- 通过header插槽定义列表左侧图片 -->
-					<template v-slot:header>
-						<image class="avatar" :src="item.avatar" mode="aspectFill"></image>
-					</template>
-					<!-- 通过body插槽定义布局 -->
-					<template v-slot:body>
-						<view class="main">
-							<text class="title">{{item.title}}</text>
-							<view class="info">
-								<text class="author">{{item.user_id[0]?item.user_id[0].nickname:''}}</text>
-								<uni-dateformat class="last_modify_date" :date="item.last_modify_date"
-									format="yyyy-MM-dd" :threshold="[60000, 2592000000]" />
-							</view>
-						</view>
-					</template>
-				</uni-list-item>
-				<!-- 加载状态：上拉加载更多，加载中，没有更多数据了，加载错误 -->
-				<!-- #ifdef APP -->
-				<uni-list-item>
-					<template v-slot:body>
-				<!-- #endif -->
-						<uni-load-state class="load-state" @networkResume="refresh" :state="{data,pagination,hasMore, loading, error}"
-							@loadMore="loadMore">
-						</uni-load-state>
-				<!-- #ifdef APP -->
-					</template>
-				</uni-list-item>
-				<!-- #endif -->
-			</uni-list>
-		</unicloud-db>
-		
-	</view>
+    <!-- 核心服务区 -->
+    <view class="main-section">
+      <view class="section-header">
+        <text class="section-title">核心服务</text>
+        <text class="section-subtitle">为您提供专业的篮球服务</text>
+      </view>
+      <view class="main-items">
+        <view class="main-item venue" @click="handleNavigation('/pages/venues/venues')" hover-class="item-hover">
+          <view class="main-item-content">
+            <view class="icon-wrapper">
+              <image
+                src="/static/images/venue.png"
+                mode="aspectFit"
+                class="main-icon"
+              ></image>
+            </view>
+            <view class="main-info">
+              <text class="main-title">一键约场</text>
+              <text class="main-desc">时段即锁定球场，3 秒搞定，随时开赛挥汗！</text>
+            </view>
+          </view>
+          <view class="main-item-arrow">
+            <text class="arrow-icon">›</text>
+          </view>
+        </view>
+        <view class="main-item course" @click="handleNavigation('/pages/match/list')" hover-class="item-hover">
+          <view class="main-item-content">
+            <view class="icon-wrapper">
+              <image
+                src="/static/images/course.png"
+                mode="aspectFit"
+                class="main-icon"
+              ></image>
+            </view>
+            <view class="main-info">
+              <text class="main-title">约赛 & 私训</text>
+              <text class="main-desc">场地、对手、教练一步到位，比赛与成长同步升级。</text>
+            </view>
+          </view>
+          <view class="main-item-arrow">
+            <text class="arrow-icon">›</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
 </template>
 
 <script>
-	let cdbRef;
-	import statusBar from "@/uni_modules/uni-nav-bar/components/uni-nav-bar/uni-status-bar";
+export default {
+  data() {
+    return {
+      banners: [
+        { image: "https://env-00jxtey807pq.normal.cloudstatic.cn/jpg/banner2.jpg" },
+        { image: "https://env-00jxtey807pq.normal.cloudstatic.cn/jpg/banner3.jpg" },
+        { image: "https://env-00jxtey807pq.normal.cloudstatic.cn/jpg/banner4.jpg" },
+        { image: "https://env-00jxtey807pq.normal.cloudstatic.cn/jpg/banner5.jpg" },
+        { image: "https://env-00jxtey807pq.normal.cloudstatic.cn/jpg/banner6.jpg" },
+        { image: "https://env-00jxtey807pq.normal.cloudstatic.cn/jpg/banner7.jpg" },
+      ],
+      promos: [
+        {
+          title: "周末特惠",
+          desc: "场地预约9折优惠",
+          image: "/static/images/promo1.jpg",
+        },
+        {
+          title: "新学员优惠",
+          desc: "首次注册送100元训练课程券",
+          image: "/static/images/promo2.jpg",
+        },
+      ],
+      testimonials: [
+        {
+          name: "张同学",
+          content: "在青沅篮球馆训练半年，进步很大，教练很专业！",
+          avatar: "/static/images/avatar1.jpg",
+        },
+        {
+          name: "李同学",
+          content: "环境很好，场地专业，孩子很喜欢来这里训练。",
+          avatar: "/static/images/avatar2.jpg",
+        },
+      ],
+    };
+  },
+  methods: {
+    handleNavigation(url) {
+      // 判断是否是 tabBar 页面
+      const tabBarPages = [
+        "/pages/index/index",
+        "/pages/venues/venues",
+        "/pages/match/list",
+        "/pages/course/course",
+        "/pages/user/user"
+      ];
+      
+      if (tabBarPages.includes(url)) {
+        uni.switchTab({
+          url,
+          fail: (err) => {
+            console.error('页面跳转失败：', err);
+            uni.showToast({
+              title: '页面跳转失败',
+              icon: 'none'
+            });
+          }
+        });
+      } else {
+        uni.navigateTo({
+          url,
+          fail: (err) => {
+            console.error('页面跳转失败：', err);
+            uni.showToast({
+              title: '页面跳转失败',
+              icon: 'none'
+            });
+          }
+        });
+      }
+    },
 
-	import Gps from '@/uni_modules/json-gps/js_sdk/gps.js';
-	const gps = new Gps(),db = uniCloud.database();
+    async handleLogin() {
+      try {
+        // 使用微信登录
+        const { code } = await uni.login({
+          provider: "weixin",
+        });
 
-	export default {
-		components: {
-			statusBar
-		},
-		computed: {
-			inputPlaceholder(e) {
-				if (uni.getStorageSync('CURRENT_LANG') == "en") {
-					return 'Please enter the search content'
-				} else {
-					return '请输入搜索内容'
-				}
-			},
-			colList(){
-				return [
-					db.collection('opendb-news-articles').where(this.where).field('avatar,title,last_modify_date,user_id').getTemp(),
-					db.collection('uni-id-users').field('_id,nickname').getTemp()
-				]
-			}
-		},
-		data() {
-			return {
-				where: '"article_status" == 1',
-				keyword: "",
-				showRefresh: false,
-				listHight: 0
-			}
-		},
-		watch: {
-			keyword(keyword, oldValue) {
-				let where = '"article_status" == 1 '
-				if (keyword) {
-					this.where = where + `&& /${keyword}/.test(title)`;
-				} else {
-					this.where = where;
-				}
-			}
-		},
-		async onReady() {
-			// #ifdef APP-NVUE
-			/* 可用窗口高度 - 搜索框高 - 状态栏高 */
-			this.listHight = uni.getSystemInfoSync().windowHeight - uni.getSystemInfoSync().statusBarHeight - 50 + 'px';
-			// #endif
-			// #ifndef APP-NVUE
-			this.listHight = 'auto'
-			// #endif
-			cdbRef = this.$refs.udb
-		},
-		async onShow() {
-			this.keyword = getApp().globalData.searchText
-			getApp().globalData.searchText = ''
-			//这里仅演示如何，在onShow生命周期获取设备位置，并在设备或者应用没有权限时自动引导。设置完毕自动重新获取。
-			//你可以基于他做自己的业务，比如：根据距离由近到远排序列表数据等
-			// uni.showLoading({
-			// 	title:"获取定位中"
-			// });
-			//默认h5端不获取定位
-			// #ifndef H5 || APP-HARMONY
-			let location = await gps.getLocation({
-				geocode: true
-			})
-			// console.log(location);
-			// #endif
-			// if(location){
-			// 	uni.showToast({
-			// 		title: JSON.stringify(location),
-			// 		icon: 'none'
-			// 	});
-			// }
-			// uni.hideLoading()
-		},
-		methods: {
-			searchClick(e) { //点击搜索框
-				uni.hideKeyboard();
-				uni.navigateTo({
-					url: '/pages/list/search/search',
-					animationType: 'fade-in'
-				});
-			},
-			retry() {
-				this.refresh()
-			},
-			refresh() {
-				cdbRef.loadData({
-					clear: true
-				}, () => {
-					uni.stopPullDownRefresh()
-					// #ifdef APP-NVUE
-					this.showRefresh = false
-					// #endif
-					console.log('end');
-				})
-				console.log('refresh');
-			},
-			loadMore() {
-				cdbRef.loadMore()
-			},
-			onqueryerror(e) {
-				console.error(e);
-			},
-			onpullingdown(e) {
-				console.log(e);
-				this.showRefresh = true
-				if(e.pullingDistance>100){
-					this.refresh()
-				}
-			},
-			navigateTo(url) {
-				uni.navigateTo({
-					url: url,
-					animationType: 'fade-in'
-				});
-			}
-		},
-		// #ifndef APP-NVUE
-		onPullDownRefresh() {
-			this.refresh()
-		},
-		onReachBottom() {
-			this.loadMore()
-		}
-		// #endif
-	}
+        const { result } = await uniCloud.callFunction({
+          name: "login",
+          data: {
+            code,
+          },
+        });
+
+        if (result.code === 0) {
+          uni.showToast({
+            title: "登录成功",
+            icon: "success",
+          });
+        } else {
+          uni.showToast({
+            title: result.msg || "登录失败",
+            icon: "none",
+          });
+        }
+      } catch (e) {
+        console.error("登录失败：", e);
+        uni.showToast({
+          title: "登录失败",
+          icon: "none",
+        });
+      }
+    },
+  },
+};
 </script>
 
-<style scoped>
-	/* #ifndef APP-NVUE */
-	view {
-		display: flex;
-		box-sizing: border-box;
-		flex-direction: column;
-	}
-	/* #endif */
-	.pages {
-		background-color: #FFFFFF;
-	}
+<style>
+.container {
+  min-height: 100vh;
+  background: #f8f9fa;
+}
 
-	.avatar {
-		width: 200rpx;
-		height: 200rpx;
-		margin-right: 10rpx;
-	}
+/* 品牌区域样式 */
+.brand-section {
+  background: linear-gradient(135deg, #1a73e8, #0d47a1);
+  padding: 40rpx 30rpx;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
+}
 
-	.main {
-		justify-content: space-between;
-		flex: 1;
-	}
+.brand-content {
+  position: relative;
+  z-index: 2;
+  padding: 20rpx 0;
+}
 
-	.title {
-		font-size: 16px;
-	}
+.brand-decoration {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 400rpx;
+  height: 400rpx;
+  background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%);
+  transform: translate(50rpx, -50rpx);
+  animation: pulse 3s infinite;
+}
 
-	.info {
-		flex-direction: row;
-		justify-content: space-between;
-	}
+@keyframes pulse {
+  0% { transform: translate(50rpx, -50rpx) scale(1); }
+  50% { transform: translate(50rpx, -50rpx) scale(1.1); }
+  100% { transform: translate(50rpx, -50rpx) scale(1); }
+}
 
-	.author,
-	.last_modify_date {
-		font-size: 14px;
-		color: #999999;
-	}
+.brand-logo {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 20rpx;
+  background: #ffffff;
+  padding: 15rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
+}
 
-	.uni-search-box {
-		background-color: #FFFFFF;
-		position: sticky;
-		height: 50px;
-		top: 0;
-		left: 0;
-		/* #ifndef APP-PLUS */
-		z-index: 9;
-		/* #endif */
-		/* #ifdef MP-WEIXIN */
-		width: 580rpx;
-		/* #endif */
-	}
-	.cover-search-bar {
-		height: 50px;
-		position: relative;
-		top: -50px;
-		margin-bottom: -50px;
-		/* #ifndef APP-NVUE */
-		z-index: 999;
-		/* #endif */
-	}
-  .load-state{
-    justify-content: center;
-    width: 750rpx;
-  }
+.brand-logo:active {
+  transform: scale(0.95);
+}
 
-	.nav-section {
-		display: flex;
-		justify-content: space-around;
-		padding: 10px;
-	}
+.brand-info {
+  flex: 1;
+}
 
-	.nav-item {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-	}
+.brand-title {
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #ffffff;
+  display: block;
+  margin-bottom: 16rpx;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.2);
+  letter-spacing: 2rpx;
+}
 
-	.nav-icon {
-		width: 40px;
-		height: 40px;
-		margin-bottom: 5px;
-	}
+.brand-slogan {
+  font-size: 32rpx;
+  font-weight: 500;
+  opacity: 0.95;
+  display: block;
+  margin-bottom: 20rpx;
+  line-height: 1.4;
+  color: #ffffff;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.1);
+}
 
-	.nav-text {
-		font-size: 14px;
-	}
+.brand-promo-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+  margin-top: 20rpx;
+}
+
+.brand-promo {
+  font-size: 28rpx;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 12rpx 30rpx;
+  border-radius: 30rpx;
+  display: inline-block;
+  backdrop-filter: blur(10px);
+  color: #ffffff;
+  text-shadow: 0 1rpx 2rpx rgba(0, 0, 0, 0.1);
+}
+
+.brand-promo-sub {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.9);
+  padding-left: 30rpx;
+  text-shadow: 0 1rpx 2rpx rgba(0, 0, 0, 0.1);
+}
+
+/* 轮播图样式 */
+.banner {
+  height: 360rpx;
+  margin: 30rpx 20rpx;
+  border-radius: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
+}
+
+.banner-item {
+  border-radius: 20rpx;
+  overflow: hidden;
+}
+
+.banner-image {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.3s ease;
+}
+
+.banner-image:active {
+  transform: scale(1.02);
+}
+
+/* 核心服务区样式 */
+.main-section {
+  padding: 40rpx 30rpx;
+  background: #ffffff;
+  margin: 20rpx;
+  border-radius: 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+}
+
+.section-header {
+  margin-bottom: 40rpx;
+  padding: 0 10rpx;
+}
+
+.section-title {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #1a73e8;
+  display: block;
+  margin-bottom: 12rpx;
+}
+
+.section-subtitle {
+  font-size: 26rpx;
+  color: #666;
+  display: block;
+}
+
+.main-items {
+  display: flex;
+  flex-direction: column;
+  gap: 30rpx;
+}
+
+.main-item {
+  background: #f8f9fa;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+  border: 2rpx solid transparent;
+}
+
+.item-hover {
+  transform: scale(0.98);
+  background: #f0f2f5;
+  border-color: #1a73e8;
+}
+
+.main-item-content {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.icon-wrapper {
+  width: 90rpx;
+  height: 90rpx;
+  margin-right: 24rpx;
+  background: #ffffff;
+  padding: 15rpx;
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.main-icon {
+  width: 60rpx;
+  height: 60rpx;
+}
+
+.main-info {
+  flex: 1;
+}
+
+.main-title {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #1a73e8;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.main-desc {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.5;
+}
+
+.main-item-arrow {
+  width: 40rpx;
+  height: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(26, 115, 232, 0.1);
+  border-radius: 50%;
+  margin-left: 20rpx;
+}
+
+.arrow-icon {
+  font-size: 36rpx;
+  color: #1a73e8;
+  font-weight: 300;
+}
+
+.venue {
+  background: linear-gradient(135deg, #f8f9fa, #e3f2fd);
+}
+
+.course {
+  background: linear-gradient(135deg, #f8f9fa, #e8f5e9);
+}
+
+/* 优惠活动区样式 */
+.promo-section {
+  padding: 20rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+  padding-left: 20rpx;
+}
+
+.promo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.promo-item {
+  background: #fff;
+  border-radius: 12rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+.promo-image {
+  width: 100%;
+  height: 200rpx;
+}
+
+.promo-info {
+  padding: 20rpx;
+}
+
+.promo-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.promo-desc {
+  font-size: 24rpx;
+  color: #666;
+}
+
+/* 用户评价区样式 */
+.testimonial-section {
+  padding: 20rpx;
+  margin-bottom: 40rpx;
+}
+
+.testimonial-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.testimonial-item {
+  background: #fff;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  display: flex;
+  align-items: flex-start;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+.testimonial-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  margin-right: 20rpx;
+}
+
+.testimonial-content {
+  flex: 1;
+}
+
+.testimonial-name {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.testimonial-text {
+  font-size: 24rpx;
+  color: #666;
+  line-height: 1.5;
+}
 </style>
