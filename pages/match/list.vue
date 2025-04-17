@@ -231,7 +231,6 @@ const loadMatches = async () => {
 
     if (result && result.code === 0) {
       matches.value = result.data.list || [];
-      console.log("处理后的比赛列表:", matches.value);
     } else {
       uni.showToast({
         title: result?.msg || "加载失败",

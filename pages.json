@@ -151,13 +151,6 @@
 					}
 				},
 				{
-					"path": "userinfo/realname-verify/realname-verify",
-					"style": {
-						"enablePullDownRefresh": false,
-						"navigationBarTitleText": "实名认证"
-					}
-				},
-				{
 					"path": "login/login-withoutpwd"
 				},
 				{
