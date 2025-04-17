@@ -130,7 +130,12 @@ import { onShow } from "@dcloudio/uni-app";
 const venues = ref([]);
 const venueOccupancy = ref({});
 const blockWidth = 80; // 每个时间块的宽度
-const businessHours = Array.from({ length: 17 }, (_, i) => i + 6); // 6:00 - 22:00
+const businessHours = computed(() => {
+  const now = new Date();
+  const currentHour = now.getHours();
+  // 只返回当前小时之后的时间
+  return Array.from({ length: 22 - currentHour }, (_, i) => i + currentHour);
+}); // 从当前时间到 22:00
 
 // 刷新页面数据
 const refreshPageData = async () => {
@@ -191,6 +196,11 @@ const getVenuesOccupancy = async () => {
 
 // 检查时间段是否被占用
 const isTimeBlockOccupied = (venue, hour, type, halfCourt) => {
+  // 检查是否是过去的时间
+  const now = new Date();
+  const currentHour = now.getHours();
+  if (hour < currentHour) return false;
+
   if (!venueOccupancy.value[venue._id]) return false;
 
   const occupiedTimes = venueOccupancy.value[venue._id];

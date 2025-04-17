@@ -284,7 +284,7 @@ const checkLogin = () => {
       success: (res) => {
         if (res.confirm) {
           uni.navigateTo({
-            url: "/uni_modules/uni-id-pages/pages/login/login-withoutpwd",
+            url: "/pages/ucenter/login",
           });
         }
       },
@@ -546,57 +546,84 @@ const selectTimeSlot = (slot) => {
 };
 
 const submitBooking = async () => {
+  if (!store.hasLogin) {
+    uni.showModal({
+      title: "提示",
+      content: "请先登录后再预约",
+      success: (res) => {
+        if (res.confirm) {
+          uni.navigateTo({
+            url: "/pages/ucenter/login",
+          });
+        }
+      },
+    });
+    return;
+  }
+
+  if (!contactPhone.value) {
+    uni.showToast({
+      title: "请输入手机号码",
+      icon: "none",
+    });
+    return;
+  }
+
+  if (!selectedTimeSlot.value) {
+    uni.showToast({
+      title: "请选择预约时间",
+      icon: "none",
+    });
+    return;
+  }
+
   try {
-    if (!checkLogin()) return;
+    loading.value = true;
+    const endTime = calculateEndTime(
+      selectedTimeSlot.value.start,
+      selectedDuration.value
+    );
 
-    if (
-      !selectedDate.value ||
-      !selectedTimeSlot ||
-      !selectedType.value ||
-      !selectedDuration.value
-    ) {
-      uni.showToast({ title: "请选择预约日期、时间和场地类型", icon: "none" });
-      return;
-    }
-
-    const result = await uniCloud.callFunction({
+    const { result } = await uniCloud.callFunction({
       name: "venue_book",
       data: {
         venueId: venueId.value,
         date: selectedDate.value,
         startTime: selectedTimeSlot.value.start,
-        endTime: selectedTimeSlot.value.end,
+        endTime: endTime,
         type: selectedType.value,
-        halfCourt:
-          selectedType.value === "half" ? assignedHalfCourt.value : null,
+        halfCourt: assignedHalfCourt.value,
         contactPhone: contactPhone.value,
         remark: remark.value,
-        userId: getUserId(),
+        userId: store.userInfo._id,
       },
     });
 
-    if (result.result.code === 0) {
-      uni.showToast({ title: "预约成功", icon: "success" });
-      setTimeout(() => uni.navigateBack(), 1500);
-    } else if (result.result.code === 2) {
-      uni.showModal({
-        title: "提示",
-        content: "请先登录后再预约",
-        confirmText: "去登录",
-        success: (res) => {
-          if (res.confirm) {
-            uni.navigateTo({
-              url: "/uni_modules/uni-id-pages/pages/login/login-withoutpwd",
-            });
-          }
-        },
+    if (result.code === 0) {
+      uni.showToast({
+        title: "预约成功",
+        icon: "success",
       });
+      // 跳转到我的预约列表页面
+      setTimeout(() => {
+        uni.redirectTo({
+          url: "/pages/ucenter/my-bookings",
+        });
+      }, 1500);
     } else {
-      uni.showToast({ title: result.result.msg || "预约失败", icon: "none" });
+      uni.showToast({
+        title: result.msg || "预约失败",
+        icon: "none",
+      });
     }
   } catch (e) {
     console.error(e);
-    uni.showToast({ title: "系统错误", icon: "none" });
+    uni.showToast({
+      title: "预约失败",
+      icon: "none",
+    });
+  } finally {
+    loading.value = false;
   }
 };
 

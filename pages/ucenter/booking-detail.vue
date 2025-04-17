@@ -8,7 +8,7 @@
         </text>
         <text class="booking-id">预约号：{{ booking._id }}</text>
       </view>
-      
+
       <!-- 场地信息 -->
       <view class="section venue-section">
         <view class="section-title">场地信息</view>
@@ -23,11 +23,13 @@
           </view>
           <view class="info-item">
             <text class="info-label">场地类型：</text>
-            <text class="info-value">{{ getBookingTypeText(booking.type, booking.halfCourt) }}</text>
+            <text class="info-value">{{
+              getBookingTypeText(booking.type, booking.halfCourt)
+            }}</text>
           </view>
         </view>
       </view>
-      
+
       <!-- 预约时间 -->
       <view class="section time-section">
         <view class="section-title">预约时间</view>
@@ -46,26 +48,30 @@
           </view>
           <view class="info-item">
             <text class="info-label">预约时长：</text>
-            <text class="info-value">{{ calculateDuration(booking.startTime, booking.endTime) }}</text>
+            <text class="info-value">{{
+              calculateDuration(booking.startTime, booking.endTime)
+            }}</text>
           </view>
         </view>
       </view>
-      
+
       <!-- 联系信息 -->
       <view class="section contact-section">
         <view class="section-title">联系信息</view>
         <view class="contact-info">
           <view class="info-item">
             <text class="info-label">联系人：</text>
-            <text class="info-value">{{ booking.userName || '未填写' }}</text>
+            <text class="info-value">{{ booking.userName || "未填写" }}</text>
           </view>
           <view class="info-item">
             <text class="info-label">联系电话：</text>
-            <text class="info-value">{{ booking.contactPhone || '未填写' }}</text>
+            <text class="info-value">{{
+              booking.contactPhone || "未填写"
+            }}</text>
           </view>
         </view>
       </view>
-      
+
       <!-- 备注信息 -->
       <view class="section remark-section" v-if="booking.remark">
         <view class="section-title">备注信息</view>
@@ -73,40 +79,55 @@
           {{ booking.remark }}
         </view>
       </view>
-      
+
       <!-- 预约记录 -->
       <view class="section record-section">
         <view class="section-title">预约记录</view>
         <view class="record-list">
           <view class="record-item">
-            <text class="record-time">{{ formatDateTime(booking.create_time) }}</text>
+            <text class="record-time">{{
+              formatDateTime(booking.create_time)
+            }}</text>
             <text class="record-action">创建预约</text>
           </view>
           <view class="record-item" v-if="booking.confirm_time">
-            <text class="record-time">{{ formatDateTime(booking.confirm_time) }}</text>
+            <text class="record-time">{{
+              formatDateTime(booking.confirm_time)
+            }}</text>
             <text class="record-action">确认预约</text>
           </view>
           <view class="record-item" v-if="booking.cancel_time">
-            <text class="record-time">{{ formatDateTime(booking.cancel_time) }}</text>
+            <text class="record-time">{{
+              formatDateTime(booking.cancel_time)
+            }}</text>
             <text class="record-action">取消预约</text>
           </view>
         </view>
       </view>
-      
+
       <!-- 操作按钮 -->
-      <view class="action-section" v-if="booking.status === 'pending' || booking.status === 'confirmed'">
-        <button class="action-btn cancel-btn" @click="cancelBooking">取消预约</button>
+      <view
+        class="action-section"
+        v-if="booking.status === 'pending' || booking.status === 'confirmed'"
+      >
+        <button class="action-btn cancel-btn" @click="cancelBooking">
+          取消预约
+        </button>
       </view>
     </view>
-    
+
     <!-- 加载中 -->
     <view class="loading" v-else-if="loading">
       <uni-load-more status="loading" />
     </view>
-    
+
     <!-- 错误状态 -->
     <view class="error-state" v-else>
-      <image src="/static/error.png" mode="aspectFit" class="error-image"></image>
+      <image
+        src="/static/error.png"
+        mode="aspectFit"
+        class="error-image"
+      ></image>
       <text class="error-text">预约信息不存在或已被删除</text>
       <button class="back-btn" @click="goBack">返回</button>
     </view>
@@ -114,46 +135,46 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted } from "vue";
 import { store } from "@/uni_modules/uni-id-pages/common/store.js";
 
 const booking = ref(null);
 const loading = ref(true);
-const bookingId = ref('');
+const bookingId = ref("");
 
 // 获取预约详情
 const fetchBookingDetail = async () => {
   if (!store.hasLogin) {
     uni.showToast({
-      title: '请先登录',
-      icon: 'none'
+      title: "请先登录",
+      icon: "none",
     });
     return;
   }
-  
+
   loading.value = true;
   try {
     const { result } = await uniCloud.callFunction({
-      name: 'venue_booking_detail',
+      name: "venue_booking_detail",
       data: {
         bookingId: bookingId.value,
-        userId: store.userInfo._id
-      }
+        userId: store.userInfo._id,
+      },
     });
-    
+
     if (result.code === 0) {
       booking.value = result.data;
     } else {
       uni.showToast({
-        title: result.msg || '获取预约详情失败',
-        icon: 'none'
+        title: result.msg || "获取预约详情失败",
+        icon: "none",
       });
     }
   } catch (e) {
     console.error(e);
     uni.showToast({
-      title: '获取预约详情失败',
-      icon: 'none'
+      title: "获取预约详情失败",
+      icon: "none",
     });
   } finally {
     loading.value = false;
@@ -163,10 +184,10 @@ const fetchBookingDetail = async () => {
 // 获取状态文本
 const getStatusText = (status) => {
   const statusMap = {
-    'pending': '待确认',
-    'confirmed': '已确认',
-    'cancelled': '已取消',
-    'completed': '已完成'
+    pending: "待确认",
+    confirmed: "已确认",
+    cancelled: "已取消",
+    completed: "已完成",
   };
   return statusMap[status] || status;
 };
@@ -174,20 +195,20 @@ const getStatusText = (status) => {
 // 获取状态样式类
 const getStatusClass = (status) => {
   const classMap = {
-    'pending': 'status-pending',
-    'confirmed': 'status-confirmed',
-    'cancelled': 'status-cancelled',
-    'completed': 'status-completed'
+    pending: "status-pending",
+    confirmed: "status-confirmed",
+    cancelled: "status-cancelled",
+    completed: "status-completed",
   };
-  return classMap[status] || '';
+  return classMap[status] || "";
 };
 
 // 获取预约类型文本
 const getBookingTypeText = (type, halfCourt) => {
-  if (type === 'full') {
-    return '全场';
-  } else if (type === 'half') {
-    return halfCourt === 'half_a' ? '半场A' : '半场B';
+  if (type === "full") {
+    return "全场";
+  } else if (type === "half") {
+    return halfCourt === "half_a" ? "半场A" : "半场B";
   }
   return type;
 };
@@ -196,8 +217,8 @@ const getBookingTypeText = (type, halfCourt) => {
 const formatDate = (dateStr) => {
   const date = new Date(dateStr);
   const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
   return `${year}年${month}月${day}日`;
 };
 
@@ -205,10 +226,10 @@ const formatDate = (dateStr) => {
 const formatDateTime = (dateStr) => {
   const date = new Date(dateStr);
   const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
   return `${year}-${month}-${day} ${hours}:${minutes}`;
 };
 
@@ -219,7 +240,7 @@ const calculateDuration = (startTime, endTime) => {
   const durationMinutes = endMinutes - startMinutes;
   const hours = Math.floor(durationMinutes / 60);
   const minutes = durationMinutes % 60;
-  
+
   if (minutes === 0) {
     return `${hours}小时`;
   } else {
@@ -229,48 +250,48 @@ const calculateDuration = (startTime, endTime) => {
 
 // 将时间字符串转换为分钟数
 const timeToMinutes = (timeStr) => {
-  const [hours, minutes] = timeStr.split(':').map(Number);
+  const [hours, minutes] = timeStr.split(":").map(Number);
   return hours * 60 + minutes;
 };
 
 // 取消预约
 const cancelBooking = () => {
   uni.showModal({
-    title: '提示',
-    content: '确定要取消此预约吗？',
+    title: "提示",
+    content: "确定要取消此预约吗？",
     success: async (res) => {
       if (res.confirm) {
         try {
           const { result } = await uniCloud.callFunction({
-            name: 'venue_cancel_booking',
+            name: "venue_cancel_booking",
             data: {
               bookingId: bookingId.value,
-              userId: store.userInfo._id
-            }
+              userId: store.userInfo._id,
+            },
           });
-          
+
           if (result.code === 0) {
             uni.showToast({
-              title: '取消预约成功',
-              icon: 'success'
+              title: "取消预约成功",
+              icon: "success",
             });
             // 刷新预约详情
             fetchBookingDetail();
           } else {
             uni.showToast({
-              title: result.msg || '取消预约失败',
-              icon: 'none'
+              title: result.msg || "取消预约失败",
+              icon: "none",
             });
           }
         } catch (e) {
           console.error(e);
           uni.showToast({
-            title: '取消预约失败',
-            icon: 'none'
+            title: "取消预约失败",
+            icon: "none",
           });
         }
       }
-    }
+    },
   });
 };
 
@@ -454,4 +475,4 @@ onMounted(() => {
   border-radius: 40rpx;
   font-size: 28rpx;
 }
-</style> 
+</style>
