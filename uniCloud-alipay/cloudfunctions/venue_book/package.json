@@ -1,0 +1,11 @@
+{
+  "name": "venue_book",
+  "version": "1.0.0",
+  "description": "场地预约功能",
+  "main": "index.js",
+  "dependencies": {},
+  "cloudfunction-config": {
+    "timeout": 30,
+    "memorySize": 256
+  }
+} 

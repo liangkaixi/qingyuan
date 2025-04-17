@@ -1,0 +1,11 @@
+{
+	"name": "venue_available_time",
+	"version": "1.0.0",
+	"description": "获取场地可用时间段",
+	"main": "index.js",
+	"dependencies": {},
+	"cloudfunction-config": {
+		"timeout": 30,
+		"memorySize": 256
+	}
+} 

@@ -1,0 +1,11 @@
+{
+  "name": "venue_check_half_courts",
+  "version": "1.0.0",
+  "description": "检查场地半场占用情况",
+  "main": "index.js",
+  "dependencies": {},
+  "cloudfunction-config": {
+    "timeout": 30,
+    "memorySize": 256
+  }
+} 

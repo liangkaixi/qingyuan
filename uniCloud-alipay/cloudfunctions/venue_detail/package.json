@@ -1,0 +1,11 @@
+{
+	"name": "venue_detail",
+	"version": "1.0.0",
+	"description": "获取场地详细信息",
+	"main": "index.js",
+	"dependencies": {},
+	"cloudfunction-config": {
+		"timeout": 30,
+		"memorySize": 256
+	}
+} 

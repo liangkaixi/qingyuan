@@ -1,166 +1,171 @@
 <template>
   <view class="container">
-    <view v-if="venue" class="venue-detail">
-      <view class="venue-header">
+    <!-- 场地基本信息 -->
+    <view class="venue-header">
+      <swiper
+        v-if="venue.images && venue.images.length > 0"
+        class="venue-swiper"
+        circular
+        autoplay
+        interval="3000"
+        duration="500"
+        indicator-dots
+        indicator-color="rgba(255, 255, 255, 0.6)"
+        indicator-active-color="#ffffff"
+      >
+        <swiper-item v-for="(image, index) in venue.images" :key="index">
+          <image :src="image" class="venue-image" mode="aspectFill" />
+        </swiper-item>
+      </swiper>
+
+      <view class="venue-info">
         <text class="venue-name">{{ venue.name }}</text>
         <text class="venue-address">{{ venue.address }}</text>
+        <view class="venue-price">
+          <text class="price-label">价格：</text>
+          <text class="price-value">¥{{ venue.price }}/小时</text>
+        </view>
+        <view class="venue-capacity">
+          <text class="capacity-label">容量：</text>
+          <text class="capacity-value">{{ venue.capacity }}人</text>
+        </view>
         <view class="venue-time">
-          <text>营业时间：{{ venue.openTime }} - {{ venue.closeTime }}</text>
-        </view>
-      </view>
-
-      <view class="booking-section">
-        <view class="section-title">预约场地</view>
-        <view class="booking-form">
-          <view class="form-item">
-            <text class="label">预约日期</text>
-            <picker
-              mode="date"
-              :value="selectedDate"
-              :start="minDate"
-              :end="maxDate"
-              @change="onDateChange"
-            >
-              <view class="picker-value">{{ selectedDate }}</view>
-            </picker>
-          </view>
-
-          <view class="form-item">
-            <text class="label">时间段</text>
-            <view class="time-slots">
-              <view
-                v-for="slot in availableTimeSlots"
-                :key="slot.start"
-                class="time-slot"
-                :class="{ selected: isSlotSelected(slot) }"
-                @click="selectTimeSlot(slot)"
-              >
-                <text
-                  >{{ formatTime(slot.start) }} -
-                  {{ formatTime(slot.end) }}</text
-                >
-              </view>
-            </view>
-          </view>
-
-          <view class="form-item">
-            <text class="label">场地类型</text>
-            <view class="type-options">
-              <view
-                v-for="type in venue.availableTypes"
-                :key="type"
-                class="type-option"
-                :class="{ selected: selectedType === type }"
-                @click="selectType(type)"
-              >
-                <text>{{ type === "full" ? "全场" : "半场" }}</text>
-              </view>
-            </view>
-          </view>
-
-          <button
-            class="submit-btn"
-            @click="submitBooking"
-            :disabled="!canSubmit"
+          <text
+            >营业时间：{{ venue.business_hours.start }} -
+            {{ venue.business_hours.end }}</text
           >
-            提交预约
-          </button>
+        </view>
+        <view class="venue-facilities">
+          <text
+            v-for="(facility, index) in venue.facilities"
+            :key="index"
+            class="facility-tag"
+          >
+            {{ facility }}
+          </text>
+        </view>
+        <view class="venue-rating">
+          <uni-rate :value="venue.rating" size="14" readonly />
+          <text class="review-count">({{ venue.review_count }}条评价)</text>
         </view>
       </view>
+    </view>
+
+    <!-- 时间选择 -->
+    <view class="time-selection">
+      <view class="section-title">
+        <text>选择时间</text>
+      </view>
+
+      <!-- 日期选择 -->
+      <view class="date-picker">
+        <picker
+          mode="date"
+          :value="selectedDate"
+          :start="minDate"
+          :end="maxDate"
+          @change="onDateChange"
+        >
+          <view class="picker-value">
+            <text>{{ selectedDate }}</text>
+            <text class="picker-arrow">▼</text>
+          </view>
+        </picker>
+      </view>
+
+      <!-- 时间条 -->
+      <TimeBar
+        :start-time="venue.business_hours.start"
+        :end-time="venue.business_hours.end"
+        :occupied-times="occupiedTimes"
+        :block-width="100"
+      />
+
+      <!-- 时间段选择 -->
+      <view class="time-slots">
+        <view
+          v-for="(slot, index) in availableTimeSlots"
+          :key="index"
+          class="time-slot"
+          :class="{ selected: isTimeSlotSelected(slot) }"
+          @click="selectTimeSlot(slot)"
+        >
+          <text class="slot-time">{{ slot.start }} - {{ slot.end }}</text>
+          <text class="slot-price">¥{{ venue.price }}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 预约按钮 -->
+    <view class="booking-button">
+      <button
+        class="book-btn"
+        :disabled="!selectedTimeSlot"
+        @click="handleBooking"
+      >
+        立即预约
+      </button>
     </view>
   </view>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import { formatTime } from "@/utils/date";
+import TimeBar from "@/components/TimeBar.vue";
 
-const venue = ref(null);
+const venue = ref({});
 const selectedDate = ref("");
 const selectedTimeSlot = ref(null);
-const selectedType = ref("");
-const availableTimeSlots = ref([]);
+const occupiedTimes = ref([]);
 
-// 计算最早可预约日期（今天）
-const minDate = computed(() => {
-  const today = new Date();
-  return today.toISOString().split("T")[0];
-});
-
-// 计算最晚可预约日期（30天后）
-const maxDate = computed(() => {
-  const date = new Date();
-  date.setDate(date.getDate() + 30);
-  return date.toISOString().split("T")[0];
-});
-
-// 是否可以提交预约
-const canSubmit = computed(() => {
-  return selectedDate.value && selectedTimeSlot.value && selectedType.value;
-});
-
-// 获取场馆详情
-const getVenueDetail = async (id) => {
+// 获取场地详情
+const getVenueDetail = async (venueId) => {
   try {
     const { result } = await uniCloud.callFunction({
       name: "venue_detail",
-      data: { id },
+      data: { venueId },
     });
     if (result.code === 0) {
       venue.value = result.data;
-      // 默认选择第一个可用类型
-      if (venue.value.availableTypes.length > 0) {
-        selectedType.value = venue.value.availableTypes[0];
-      }
+      // 设置默认日期为今天
+      const today = new Date();
+      selectedDate.value = formatDate(today);
+      // 获取占用时间
+      getOccupiedTimes(venueId, selectedDate.value);
     } else {
       uni.showToast({
-        title: result.msg || "获取场馆详情失败",
+        title: result.msg || "获取场地详情失败",
         icon: "none",
       });
     }
   } catch (e) {
     console.error(e);
     uni.showToast({
-      title: "获取场馆详情失败",
+      title: "获取场地详情失败",
       icon: "none",
     });
   }
 };
 
-// 获取可用时间段
-const getAvailableTimeSlots = async () => {
-  if (!selectedDate.value) return;
-
+// 获取占用时间
+const getOccupiedTimes = async (venueId, date) => {
   try {
     const { result } = await uniCloud.callFunction({
       name: "venue_available_time",
-      data: {
-        venueId: venue.value._id,
-        date: selectedDate.value,
-      },
+      data: { venueId, date },
     });
     if (result.code === 0) {
-      availableTimeSlots.value = result.data;
-    } else {
-      uni.showToast({
-        title: result.msg || "获取可用时间段失败",
-        icon: "none",
-      });
+      occupiedTimes.value = result.data.occupiedTimes || [];
     }
   } catch (e) {
     console.error(e);
-    uni.showToast({
-      title: "获取可用时间段失败",
-      icon: "none",
-    });
   }
 };
 
-// 日期变化处理
+// 日期选择处理
 const onDateChange = (e) => {
   selectedDate.value = e.detail.value;
-  selectedTimeSlot.value = null;
-  getAvailableTimeSlots();
+  getOccupiedTimes(venue.value._id, selectedDate.value);
 };
 
 // 选择时间段
@@ -168,30 +173,31 @@ const selectTimeSlot = (slot) => {
   selectedTimeSlot.value = slot;
 };
 
-// 判断时间段是否被选中
-const isSlotSelected = (slot) => {
+// 检查时间段是否被选中
+const isTimeSlotSelected = (slot) => {
   return (
     selectedTimeSlot.value &&
-    slot.start === selectedTimeSlot.value.start &&
-    slot.end === selectedTimeSlot.value.end
+    selectedTimeSlot.value.start === slot.start &&
+    selectedTimeSlot.value.end === slot.end
   );
 };
 
-// 选择场地类型
-const selectType = (type) => {
-  selectedType.value = type;
-};
-
-// 提交预约
-const submitBooking = async () => {
-  if (!canSubmit.value) return;
+// 处理预约
+const handleBooking = async () => {
+  if (!selectedTimeSlot.value) {
+    uni.showToast({
+      title: "请选择时间段",
+      icon: "none",
+    });
+    return;
+  }
 
   try {
     const { result } = await uniCloud.callFunction({
       name: "venue_book",
       data: {
         venueId: venue.value._id,
-        type: selectedType.value,
+        date: selectedDate.value,
         startTime: selectedTimeSlot.value.start,
         endTime: selectedTimeSlot.value.end,
       },
@@ -202,10 +208,8 @@ const submitBooking = async () => {
         title: "预约成功",
         icon: "success",
       });
-      // 重置表单
-      selectedTimeSlot.value = null;
-      // 刷新可用时间段
-      getAvailableTimeSlots();
+      // 刷新占用时间
+      getOccupiedTimes(venue.value._id, selectedDate.value);
     } else {
       uni.showToast({
         title: result.msg || "预约失败",
@@ -221,6 +225,64 @@ const submitBooking = async () => {
   }
 };
 
+// 格式化日期为 YYYY-MM-DD
+const formatDate = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+// 计算可用时间段
+const availableTimeSlots = computed(() => {
+  const slots = [];
+  const startMinutes = timeToMinutes(
+    venue.value.business_hours?.start || "06:00"
+  );
+  const endMinutes = timeToMinutes(venue.value.business_hours?.end || "22:00");
+
+  for (let minutes = startMinutes; minutes < endMinutes - 60; minutes += 60) {
+    const startTime = minutesToTime(minutes);
+    const endTime = minutesToTime(minutes + 60);
+
+    // 检查时间段是否被占用
+    const isOccupied = occupiedTimes.value.some((period) => {
+      const periodStart = timeToMinutes(period.start);
+      const periodEnd = timeToMinutes(period.end);
+      return minutes >= periodStart && minutes < periodEnd;
+    });
+
+    if (!isOccupied) {
+      slots.push({ start: startTime, end: endTime });
+    }
+  }
+
+  return slots;
+});
+
+// 将时间字符串转换为分钟数
+const timeToMinutes = (timeStr) => {
+  const [hours, minutes] = timeStr.split(":").map(Number);
+  return hours * 60 + minutes;
+};
+
+// 将分钟数转换为时间字符串
+const minutesToTime = (minutes) => {
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  return `${hours.toString().padStart(2, "0")}:${mins
+    .toString()
+    .padStart(2, "0")}`;
+};
+
+// 日期范围
+const minDate = computed(() => formatDate(new Date()));
+const maxDate = computed(() => {
+  const date = new Date();
+  date.setMonth(date.getMonth() + 1);
+  return formatDate(date);
+});
+
 onMounted(() => {
   const pages = getCurrentPages();
   const currentPage = pages[pages.length - 1];
@@ -228,8 +290,6 @@ onMounted(() => {
 
   if (venueId) {
     getVenueDetail(venueId);
-    // 设置默认日期为今天
-    selectedDate.value = minDate.value;
   }
 });
 </script>
@@ -239,14 +299,29 @@ onMounted(() => {
   padding: 20rpx;
 }
 
-.venue-detail {
+.venue-header {
   background-color: #ffffff;
   border-radius: 12rpx;
-  padding: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+  margin-bottom: 20rpx;
 }
 
-.venue-header {
-  margin-bottom: 30rpx;
+.venue-swiper {
+  width: 100%;
+  height: 400rpx;
+}
+
+.venue-image {
+  width: 100%;
+  height: 100%;
+}
+
+.venue-info {
+  padding: 20rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
 }
 
 .venue-name {
@@ -258,18 +333,58 @@ onMounted(() => {
 .venue-address {
   font-size: 28rpx;
   color: #666;
-  margin-top: 10rpx;
-  display: block;
+}
+
+.venue-price,
+.venue-capacity {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.price-value,
+.capacity-value {
+  color: #007aff;
+  font-weight: bold;
 }
 
 .venue-time {
   font-size: 26rpx;
   color: #999;
+}
+
+.venue-facilities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
   margin-top: 10rpx;
 }
 
-.booking-section {
-  margin-top: 30rpx;
+.facility-tag {
+  background-color: #f0f0f0;
+  color: #666;
+  padding: 4rpx 16rpx;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+}
+
+.venue-rating {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  margin-top: 10rpx;
+}
+
+.review-count {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.time-selection {
+  background-color: #ffffff;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
 }
 
 .section-title {
@@ -279,69 +394,83 @@ onMounted(() => {
   margin-bottom: 20rpx;
 }
 
-.form-item {
-  margin-bottom: 30rpx;
-}
-
-.label {
-  font-size: 28rpx;
-  color: #666;
-  margin-bottom: 10rpx;
-  display: block;
+.date-picker {
+  margin-bottom: 20rpx;
 }
 
 .picker-value {
-  background-color: #f5f5f5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 20rpx;
+  background-color: #f5f5f5;
   border-radius: 8rpx;
   font-size: 28rpx;
   color: #333;
+}
+
+.picker-arrow {
+  font-size: 24rpx;
+  color: #999;
 }
 
 .time-slots {
   display: flex;
   flex-wrap: wrap;
   gap: 20rpx;
+  margin-top: 20rpx;
 }
 
 .time-slot {
-  background-color: #f5f5f5;
+  width: calc(50% - 10rpx);
   padding: 20rpx;
+  background-color: #f5f5f5;
   border-radius: 8rpx;
-  font-size: 28rpx;
-  color: #333;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10rpx;
 }
 
 .time-slot.selected {
-  background-color: #007aff;
-  color: #ffffff;
+  background-color: #e6f7ff;
+  border: 2rpx solid #007aff;
 }
 
-.type-options {
-  display: flex;
-  gap: 20rpx;
-}
-
-.type-option {
-  background-color: #f5f5f5;
-  padding: 20rpx 40rpx;
-  border-radius: 8rpx;
+.slot-time {
   font-size: 28rpx;
   color: #333;
+  font-weight: bold;
 }
 
-.type-option.selected {
+.slot-price {
+  font-size: 24rpx;
+  color: #007aff;
+}
+
+.booking-button {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20rpx;
+  background-color: #ffffff;
+  box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.1);
+}
+
+.book-btn {
+  width: 100%;
+  height: 80rpx;
+  line-height: 80rpx;
   background-color: #007aff;
   color: #ffffff;
+  font-size: 32rpx;
+  border-radius: 40rpx;
+  text-align: center;
 }
 
-.submit-btn {
-  background-color: #007aff;
-  color: #ffffff;
-  margin-top: 40rpx;
-}
-
-.submit-btn[disabled] {
+.book-btn[disabled] {
   background-color: #cccccc;
+  color: #ffffff;
 }
 </style>
