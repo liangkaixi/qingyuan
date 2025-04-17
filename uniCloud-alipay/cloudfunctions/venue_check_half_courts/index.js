@@ -89,3 +89,4 @@ function calculateTotalHours(startTime, endTime) {
 	
 	return (endMinutes - startMinutes) / 60;
 } 
+ 

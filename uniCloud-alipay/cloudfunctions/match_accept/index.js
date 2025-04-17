@@ -5,11 +5,11 @@ const matchesCollection = db.collection('matches');
 
 exports.main = async (event, context) => {
   // 获取用户信息
-  const { OPENID, UNIONID } = context;
-  if (!OPENID) {
+  const { uniIdToken, OPENID } = event;
+  if (!uniIdToken) {
     return {
       code: 1,
-      msg: '未登录',
+      msg: '请先登录',
     };
   }
 
