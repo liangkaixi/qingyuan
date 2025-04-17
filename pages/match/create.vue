@@ -1,7 +1,7 @@
 <template>
   <view class="container">
     <view class="form-container">
-      <view class="form-title">发起比赛</view>
+      <view class="form-title">发战贴</view>
 
       <!-- 球队名称 -->
       <view class="form-item">
@@ -88,7 +88,7 @@
 
       <!-- 提交按钮 -->
       <view class="submit-section">
-        <button class="submit-btn" @click="submitMatch">发起比赛</button>
+        <button class="submit-btn" @click="submitMatch">发战贴</button>
       </view>
     </view>
   </view>

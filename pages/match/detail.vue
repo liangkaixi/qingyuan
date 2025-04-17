@@ -39,7 +39,7 @@
               team.status === 'accepted' ? 'accepted' : 'pending',
             ]"
           >
-            {{ team.status === "accepted" ? "已接受" : "待确认" }}
+            {{ team.status === "accepted" ? "已应战" : "待确认" }}
           </text>
         </view>
       </view>
@@ -81,8 +81,8 @@ export default {
 
     const getStatusText = (status) => {
       const statusMap = {
-        pending: "待接受",
-        accepted: "已接受",
+        pending: "待应战",
+        accepted: "已应战",
         rejected: "已拒绝",
         cancelled: "已取消",
       };

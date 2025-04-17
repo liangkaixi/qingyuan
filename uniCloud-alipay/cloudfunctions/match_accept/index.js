@@ -81,11 +81,11 @@ exports.main = async (event, context) => {
     } else {
       return {
         code: 7,
-        msg: '接受失败',
+        msg: '应战失败',
       };
     }
   } catch (e) {
-    console.error('接受比赛失败:', e);
+    console.error('应战失败:', e);
     return {
       code: 8,
       msg: '系统错误',

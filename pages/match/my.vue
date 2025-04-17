@@ -2,7 +2,7 @@
   <view class="container">
     <view class="header">
       <text class="title">我的比赛</text>
-      <button class="create-btn" @click="createMatch">发起比赛</button>
+      <button class="create-btn" @click="createMatch">发战贴</button>
     </view>
 
     <view v-if="matches.length > 0" class="match-list">
@@ -171,8 +171,8 @@ export default {
     },
     getStatusText(status) {
       const statusMap = {
-        pending: "待接受",
-        accepted: "已接受",
+        pending: "待应战",
+        accepted: "已应战",
         rejected: "已拒绝",
         cancelled: "已取消",
       };

@@ -54,7 +54,7 @@
     },
     "status": {
       "bsonType": "string",
-      "description": "比赛状态：pending-待接受，accepted-已接受，rejected-已拒绝，cancelled-已取消",
+      "description": "比赛状态：pending-待应战，accepted-已应战，rejected-已拒绝，cancelled-已取消",
       "enum": ["pending", "accepted", "rejected", "cancelled"]
     },
     "invitation": {
@@ -79,7 +79,7 @@
           },
           "status": {
             "bsonType": "string",
-            "description": "报名状态：pending-待确认，accepted-已接受",
+            "description": "报名状态：pending-待确认，accepted-已应战",
             "enum": ["pending", "accepted"]
           }
         }

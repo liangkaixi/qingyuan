@@ -609,7 +609,7 @@ const submitBooking = async () => {
         uni.showModal({
           title: "预约成功",
           content: "是否要发起一场比赛？",
-          confirmText: "发起比赛",
+          confirmText: "发战贴",
           cancelText: "查看预约",
           success: (res) => {
             if (res.confirm) {

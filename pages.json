@@ -5,7 +5,8 @@
 				// #ifndef APP
 				"enablePullDownRefresh": true,
 				// #endif
-				"navigationStyle": "custom"
+				"navigationStyle": "custom",
+				"navigationBarTitleText": "青沅篮球馆欢迎您"
 			}
 		},
 		{
@@ -67,7 +68,7 @@
 		{
 			"path": "pages/match/create",
 			"style": {
-				"navigationBarTitleText": "发起比赛",
+				"navigationBarTitleText": "发战贴",
 				"enablePullDownRefresh": false
 			}
 		},
