@@ -6,12 +6,67 @@ const bookingsCollection = db.collection('bookings');
 
 exports.main = async (event, context) => {
 	try {
+		console.log('收到预约请求，参数：', event);
+		
+		// 如果是取消预约操作
+		if (event.type === 'cancel') {
+			const { bookingId, userId } = event;
+			console.log('取消预约参数：', { bookingId, userId });
+			
+			if (!bookingId || !userId) {
+				return {
+					code: 1,
+					msg: '取消预约参数不完整'
+				};
+			}
+
+			// 检查预约是否存在
+			const booking = await bookingsCollection.doc(bookingId).get();
+			if (!booking.data || booking.data.length === 0) {
+				return {
+					code: 2,
+					msg: '预约不存在'
+				};
+			}
+
+			const bookingData = booking.data[0];
+			console.log('找到预约记录：', bookingData);
+
+			// 检查是否是用户自己的预约
+			if (bookingData.user_id !== userId) {
+				return {
+					code: 3,
+					msg: '无权取消此预约'
+				};
+			}
+
+			// 检查预约状态
+			if (bookingData.status === 'cancelled') {
+				return {
+					code: 4,
+					msg: '该预约已取消'
+				};
+			}
+
+			// 更新预约状态为已取消
+			await bookingsCollection.doc(bookingId).update({
+				status: 'cancelled',
+				update_time: new Date().toISOString()
+			});
+
+			return {
+				code: 0,
+				msg: '取消预约成功'
+			};
+		}
+
+		// 预约场地的逻辑
 		// 参数校验
 		const { venueId, date, startTime, endTime, type, halfCourt, contactPhone, remark, userId } = event;
 		if (!venueId || !date || !startTime || !endTime || !type || !contactPhone || !userId) {
 			return {
 				code: 1,
-				msg: '参数不完整'
+				msg: '预约参数不完整'
 			};
 		}
 
@@ -95,16 +150,20 @@ exports.main = async (event, context) => {
 			start_time: startTime,
 			end_time: endTime,
 			type: type,
-			half_court: type === 'half' ? halfCourt : null,
-			contact_phone: contactPhone,
-			remark: remark || '',
+			half_court: halfCourt,
 			status: 'confirmed',
+			contact_phone: contactPhone,
+			remark: remark,
 			create_time: new Date().toISOString(),
 			update_time: new Date().toISOString()
 		};
-
+		
+		console.log('创建预约记录，数据：', bookingData);
+		
 		const result = await bookingsCollection.add(bookingData);
-
+		
+		console.log('创建预约记录结果：', result);
+		
 		return {
 			code: 0,
 			msg: '预约成功',
@@ -113,7 +172,7 @@ exports.main = async (event, context) => {
 			}
 		};
 	} catch (e) {
-		console.error(e);
+		console.error('预约操作失败：', e);
 		return {
 			code: -1,
 			msg: '系统错误'
