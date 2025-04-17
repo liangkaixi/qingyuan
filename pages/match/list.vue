@@ -1,8 +1,7 @@
 <template>
   <view class="container">
     <view class="header">
-      <text class="title">我的比赛</text>
-      <button class="create-btn" @click="createMatch">发起比赛</button>
+      <text class="title">比赛列表</text>
     </view>
 
     <view v-if="matches.length > 0" class="match-list">
@@ -23,7 +22,7 @@
 
         <view class="match-info">
           <view class="info-row">
-            <text class="label">球队：</text>
+            <text class="label">发起球队：</text>
             <text class="value">{{ match.teamName }}</text>
           </view>
           <view class="info-row">
@@ -66,11 +65,11 @@
 
         <view class="match-actions">
           <button
-            v-if="match.status === 'pending'"
-            class="action-btn cancel"
-            @click.stop="cancelMatch(match._id)"
+            v-if="match.status === 'pending' && hasLogin && !isMyMatch(match)"
+            class="action-btn accept"
+            @click.stop="acceptMatch(match)"
           >
-            取消比赛
+            接受比赛
           </button>
         </view>
       </view>
@@ -99,6 +98,10 @@ export default {
       page: 1,
       pageSize: 10,
       loadMoreStatus: "more",
+      showAcceptForm: false,
+      currentMatch: null,
+      teamName: "",
+      contactPhone: "",
     };
   },
   computed: {
@@ -107,9 +110,7 @@ export default {
     },
   },
   onLoad() {
-    if (this.hasLogin) {
-      this.fetchMatches();
-    }
+    this.fetchMatches();
   },
   onPullDownRefresh() {
     this.page = 1;
@@ -125,8 +126,6 @@ export default {
   },
   methods: {
     async fetchMatches() {
-      if (!this.hasLogin) return;
-
       try {
         this.loadMoreStatus = "loading";
         const { result } = await uniCloud.callFunction({
@@ -134,6 +133,7 @@ export default {
           data: {
             page: this.page,
             pageSize: this.pageSize,
+            status: "pending", // 只获取待接受的比赛
           },
         });
 
@@ -192,41 +192,117 @@ export default {
         url: `/pages/match/detail?id=${matchId}`,
       });
     },
-    createMatch() {
-      uni.navigateTo({
-        url: "/pages/match/create",
+    isMyMatch(match) {
+      if (!this.hasLogin) return false;
+      return match.userId === store.userInfo._id;
+    },
+    acceptMatch(match) {
+      if (!this.hasLogin) {
+        uni.showModal({
+          title: "提示",
+          content: "请先登录后再接受比赛",
+          success: (res) => {
+            if (res.confirm) {
+              uni.navigateTo({
+                url: "/pages/ucenter/login",
+              });
+            }
+          },
+        });
+        return;
+      }
+
+      this.currentMatch = match;
+      this.showAcceptForm = true;
+
+      // 显示接受比赛的表单
+      uni.showModal({
+        title: "接受比赛",
+        content: "请输入您的球队名称和联系方式",
+        editable: true,
+        placeholderText: "球队名称",
+        success: (res) => {
+          if (res.confirm) {
+            if (!res.content.trim()) {
+              uni.showToast({
+                title: "请输入球队名称",
+                icon: "none",
+              });
+              return;
+            }
+
+            this.teamName = res.content;
+
+            // 再次弹窗获取联系方式
+            uni.showModal({
+              title: "联系方式",
+              content: "请输入您的联系方式",
+              editable: true,
+              placeholderText: "手机号码",
+              success: (phoneRes) => {
+                if (phoneRes.confirm) {
+                  if (!phoneRes.content.trim()) {
+                    uni.showToast({
+                      title: "请输入联系方式",
+                      icon: "none",
+                    });
+                    return;
+                  }
+
+                  this.contactPhone = phoneRes.content;
+
+                  // 确认接受比赛
+                  uni.showModal({
+                    title: "确认",
+                    content: `确定要接受这场比赛吗？\n球队：${this.teamName}\n联系方式：${this.contactPhone}`,
+                    success: (confirmRes) => {
+                      if (confirmRes.confirm) {
+                        this.submitAcceptMatch();
+                      }
+                    },
+                  });
+                }
+              },
+            });
+          }
+        },
       });
     },
-    async cancelMatch(matchId) {
+    async submitAcceptMatch() {
       try {
-        const res = await uni.showModal({
-          title: "提示",
-          content: "确定要取消这场比赛吗？",
+        uni.showLoading({
+          title: "提交中...",
         });
-
-        if (!res.confirm) return;
 
         const { result } = await uniCloud.callFunction({
-          name: "match_cancel",
-          data: { matchId },
+          name: "match_accept",
+          data: {
+            matchId: this.currentMatch._id,
+            teamName: this.teamName,
+            contactPhone: this.contactPhone,
+            userId: store.userInfo._id,
+          },
         });
+
+        uni.hideLoading();
 
         if (result.code === 0) {
           uni.showToast({
-            title: "取消成功",
+            title: "接受成功",
             icon: "success",
           });
           this.fetchMatches();
         } else {
           uni.showToast({
-            title: result.msg,
+            title: result.msg || "接受失败",
             icon: "none",
           });
         }
       } catch (e) {
-        console.error("取消比赛失败：", e);
+        uni.hideLoading();
+        console.error("接受比赛失败：", e);
         uni.showToast({
-          title: "取消失败",
+          title: "接受失败",
           icon: "none",
         });
       }
@@ -252,14 +328,6 @@ export default {
     font-size: 36rpx;
     font-weight: bold;
     color: #333;
-  }
-
-  .create-btn {
-    background-color: #007aff;
-    color: #fff;
-    font-size: 28rpx;
-    padding: 10rpx 30rpx;
-    border-radius: 30rpx;
   }
 }
 
@@ -377,8 +445,8 @@ export default {
         border-radius: 20rpx;
         margin-left: 20rpx;
 
-        &.cancel {
-          background-color: #ff4d4f;
+        &.accept {
+          background-color: #52c41a;
           color: #fff;
         }
       }

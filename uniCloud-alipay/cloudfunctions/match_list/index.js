@@ -5,22 +5,16 @@ const matchesCollection = db.collection('matches');
 const _ = db.command;
 
 exports.main = async (event, context) => {
-  const { uniIdToken, OPENID } = event;
-  const { page = 1, pageSize = 10, status } = event;
+  const { page = 1, pageSize = 10, status, userId } = event;
   
-  // 参数校验
-  if (!uniIdToken) {
-    return {
-      code: 1,
-      msg: '请先登录'
-    };
-  }
-
   try {
     // 构建查询条件
-    const query = {
-      user_id: OPENID
-    };
+    const query = {};
+    
+    // 如果指定了用户ID，只查询该用户的比赛
+    if (userId) {
+      query.userId = userId;
+    }
     
     // 如果指定了状态，添加状态筛选
     if (status) {

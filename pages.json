@@ -102,6 +102,13 @@
 			}
 		},
 		{
+			"path": "pages/match/list",
+			"style": {
+				"navigationBarTitleText": "比赛列表",
+				"enablePullDownRefresh": true
+			}
+		},
+		{
 			"path": "pages/match/detail",
 			"style": {
 				"navigationBarTitleText": "比赛详情",

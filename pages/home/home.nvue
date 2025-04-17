@@ -11,6 +11,26 @@
 			<view class="cover-search-bar" @click="searchClick"></view>
 		</view>
 
+		<!-- 功能导航 -->
+		<view class="nav-section">
+			<view class="nav-item" @click="navigateTo('/pages/venues/venues')">
+				<image class="nav-icon" src="/static/icons/venue-booking.png" mode="aspectFit"></image>
+				<text class="nav-text">球馆预约</text>
+			</view>
+			<view class="nav-item" @click="navigateTo('/pages/match/list')">
+				<image class="nav-icon" src="/static/icons/match-create.png" mode="aspectFit"></image>
+				<text class="nav-text">比赛列表</text>
+			</view>
+			<view class="nav-item" @click="navigateTo('/pages/match/create')">
+				<image class="nav-icon" src="/static/icons/match-create.png" mode="aspectFit"></image>
+				<text class="nav-text">发起比赛</text>
+			</view>
+			<view class="nav-item" @click="navigateTo('/pages/match/my')">
+				<image class="nav-icon" src="/static/icons/match-create.png" mode="aspectFit"></image>
+				<text class="nav-text">我的比赛</text>
+			</view>
+		</view>
+
 		<unicloud-db ref='udb' v-slot:default="{data,pagination,hasMore, loading, error, options}" @error="onqueryerror"
 			:collection="colList" :page-size="10"
 			>
@@ -170,6 +190,12 @@
 				if(e.pullingDistance>100){
 					this.refresh()
 				}
+			},
+			navigateTo(url) {
+				uni.navigateTo({
+					url: url,
+					animationType: 'fade-in'
+				});
 			}
 		},
 		// #ifndef APP-NVUE
@@ -247,4 +273,26 @@
     justify-content: center;
     width: 750rpx;
   }
+
+	.nav-section {
+		display: flex;
+		justify-content: space-around;
+		padding: 10px;
+	}
+
+	.nav-item {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+
+	.nav-icon {
+		width: 40px;
+		height: 40px;
+		margin-bottom: 5px;
+	}
+
+	.nav-text {
+		font-size: 14px;
+	}
 </style>
