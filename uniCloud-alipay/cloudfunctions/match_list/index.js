@@ -11,11 +11,6 @@ exports.main = async (event, context) => {
     // 构建查询条件
     const query = {};
     
-    // 如果指定了用户ID，只查询该用户的比赛
-    if (userId) {
-      query.userId = userId;
-    }
-    
     // 如果指定了状态，添加状态筛选
     if (status) {
       query.status = status;

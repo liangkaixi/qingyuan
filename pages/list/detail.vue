@@ -46,11 +46,11 @@
 
       <view class="match-actions">
         <button
-          v-if="match.status === 'pending' && isMyMatch"
-          class="action-btn cancel"
-          @click="cancelMatch"
+          v-if="match.status === 'pending' && hasLogin && !isMyMatch"
+          class="action-btn accept"
+          @click="acceptMatch"
         >
-          取消比赛
+          接受比赛
         </button>
       </view>
     </view>
@@ -65,9 +65,13 @@ export default {
   setup() {
     const match = ref({});
     const matchId = ref("");
+    const showAcceptForm = ref(false);
+    const teamName = ref("");
+    const contactPhone = ref("");
 
+    const hasLogin = computed(() => store.hasLogin);
     const isMyMatch = computed(() => {
-      if (!store.hasLogin) return false;
+      if (!hasLogin.value) return false;
       return match.value.userId === store.userInfo._id;
     });
 
@@ -125,16 +129,90 @@ export default {
       }
     };
 
-    const cancelMatch = async () => {
+    const acceptMatch = () => {
+      if (!hasLogin.value) {
+        uni.showModal({
+          title: "提示",
+          content: "请先登录后再接受比赛",
+          success: (res) => {
+            if (res.confirm) {
+              uni.navigateTo({
+                url: "/pages/ucenter/login",
+              });
+            }
+          },
+        });
+        return;
+      }
+
+      showAcceptForm.value = true;
+
+      // 显示接受比赛的表单
+      uni.showModal({
+        title: "接受比赛",
+        content: "请输入您的球队名称和联系方式",
+        editable: true,
+        placeholderText: "球队名称",
+        success: (res) => {
+          if (res.confirm) {
+            if (!res.content.trim()) {
+              uni.showToast({
+                title: "请输入球队名称",
+                icon: "none",
+              });
+              return;
+            }
+
+            teamName.value = res.content;
+
+            // 再次弹窗获取联系方式
+            uni.showModal({
+              title: "联系方式",
+              content: "请输入您的联系方式",
+              editable: true,
+              placeholderText: "手机号码",
+              success: (phoneRes) => {
+                if (phoneRes.confirm) {
+                  if (!phoneRes.content.trim()) {
+                    uni.showToast({
+                      title: "请输入联系方式",
+                      icon: "none",
+                    });
+                    return;
+                  }
+
+                  contactPhone.value = phoneRes.content;
+
+                  // 确认接受比赛
+                  uni.showModal({
+                    title: "确认",
+                    content: `确定要接受这场比赛吗？\n球队：${teamName.value}\n联系方式：${contactPhone.value}`,
+                    success: (confirmRes) => {
+                      if (confirmRes.confirm) {
+                        submitAcceptMatch();
+                      }
+                    },
+                  });
+                }
+              },
+            });
+          }
+        },
+      });
+    };
+
+    const submitAcceptMatch = async () => {
       try {
         uni.showLoading({
-          title: "取消中...",
+          title: "提交中...",
         });
 
         const { result } = await uniCloud.callFunction({
-          name: "match_cancel",
+          name: "match_accept",
           data: {
             matchId: matchId.value,
+            teamName: teamName.value,
+            contactPhone: contactPhone.value,
             userId: store.userInfo._id,
             uniIdToken: uni.getStorageSync("uni_id_token"),
           },
@@ -144,22 +222,21 @@ export default {
 
         if (result.code === 0) {
           uni.showToast({
-            title: "取消成功",
+            title: "接受成功",
             icon: "success",
           });
-          // 刷新比赛详情
           fetchMatchDetail();
         } else {
           uni.showToast({
-            title: result.msg || "取消失败",
+            title: result.msg || "接受失败",
             icon: "none",
           });
         }
       } catch (e) {
         uni.hideLoading();
-        console.error("取消比赛失败：", e);
+        console.error("接受比赛失败：", e);
         uni.showToast({
-          title: "取消失败",
+          title: "接受失败",
           icon: "none",
         });
       }
@@ -174,11 +251,12 @@ export default {
 
     return {
       match,
+      hasLogin,
       isMyMatch,
       getMatchTypeText,
       getStatusText,
       getStatusClass,
-      cancelMatch,
+      acceptMatch,
     };
   },
 };
@@ -303,8 +381,8 @@ export default {
       border-radius: 20rpx;
       margin-left: 20rpx;
 
-      &.cancel {
-        background-color: #ff4d4f;
+      &.accept {
+        background-color: #52c41a;
         color: #fff;
       }
     }

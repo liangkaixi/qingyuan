@@ -304,6 +304,11 @@
 			"selectedIconPath": "/static/tabbar/venue-active.png",
 			"text": "球馆"
 		}, {
+			"pagePath": "pages/match/list",
+			"iconPath": "/static/tabbar/match.png",
+			"selectedIconPath": "/static/tabbar/match-active.png",
+			"text": "比赛"
+		}, {
 			"pagePath": "pages/ucenter/ucenter",
 			"iconPath": "/static/tabbar/my.png",
 			"selectedIconPath": "/static/tabbar/my-active.png",
