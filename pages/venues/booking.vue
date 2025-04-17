@@ -911,25 +911,29 @@ onMounted(async () => {
 
 .time-legend {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   margin-top: 20rpx;
   padding: 10rpx;
   background-color: #f9f9f9;
   border-radius: 8rpx;
+  justify-content: space-between;
 }
 
 .legend-item {
   display: flex;
   align-items: center;
-  margin-right: 20rpx;
-  margin-bottom: 10rpx;
+  margin-right: 10rpx;
+}
+
+.legend-item:last-child {
+  margin-right: 0;
 }
 
 .legend-color {
-  width: 30rpx;
-  height: 30rpx;
+  width: 24rpx;
+  height: 24rpx;
   border-radius: 4rpx;
-  margin-right: 10rpx;
+  margin-right: 6rpx;
 }
 
 .legend-color.available {
@@ -939,19 +943,23 @@ onMounted(async () => {
 
 .legend-color.full-court {
   background-color: #ff6b6b;
+  border: 1px solid #ff6b6b;
 }
 
 .legend-color.half-court-a {
   background-color: #ffd166;
+  border: 1px solid #ffd166;
 }
 
 .legend-color.half-court-b {
   background-color: #06d6a0;
+  border: 1px solid #06d6a0;
 }
 
 .legend-text {
-  font-size: 24rpx;
+  font-size: 22rpx;
   color: #666;
+  white-space: nowrap;
 }
 
 .duration-selector {

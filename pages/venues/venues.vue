@@ -406,23 +406,29 @@ onMounted(() => {
 
 .legend {
   display: flex;
-  flex-wrap: wrap;
-  margin-top: 10px;
-  padding: 5px;
+  flex-wrap: nowrap;
+  margin-top: 20rpx;
+  padding: 10rpx;
+  background-color: #f9f9f9;
+  border-radius: 8rpx;
+  justify-content: space-between;
 }
 
 .legend-item {
   display: flex;
   align-items: center;
-  margin-right: 15px;
-  margin-bottom: 5px;
+  margin-right: 10rpx;
+}
+
+.legend-item:last-child {
+  margin-right: 0;
 }
 
 .legend-color {
-  width: 15px;
-  height: 15px;
-  border-radius: 3px;
-  margin-right: 5px;
+  width: 24rpx;
+  height: 24rpx;
+  border-radius: 4rpx;
+  margin-right: 6rpx;
 }
 
 .legend-color.available {
@@ -442,8 +448,9 @@ onMounted(() => {
 }
 
 .legend-item text {
-  font-size: 12px;
+  font-size: 22rpx;
   color: #666;
+  white-space: nowrap;
 }
 
 .venue-facilities {
